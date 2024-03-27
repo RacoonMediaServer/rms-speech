@@ -4,7 +4,9 @@ import "github.com/RacoonMediaServer/rms-packages/pkg/configuration"
 
 // Configuration represents entire service configuration
 type Configuration struct {
-	Database configuration.Database
+	Workers        uint
+	MaxJodDuration uint `json:"max_jod_duration"`
+	Debug          configuration.Debug
 }
 
 var config Configuration

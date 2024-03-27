@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/RacoonMediaServer/rms-packages/pkg/service/servicemgr"
-	"github.com/RacoonMediaServer/rms-template/internal/config"
-	"github.com/RacoonMediaServer/rms-template/internal/db"
+	rms_speech "github.com/RacoonMediaServer/rms-packages/pkg/service/rms-speech"
+	"github.com/RacoonMediaServer/rms-packages/pkg/worker"
+	"github.com/RacoonMediaServer/rms-speech/internal/config"
+	"github.com/RacoonMediaServer/rms-speech/internal/service/speech"
 	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
 	"go-micro.dev/v4/logger"
+	"time"
 
 	// Plugins
 	_ "github.com/go-micro/plugins/v4/registry/etcd"
@@ -15,7 +17,7 @@ import (
 
 var Version = "v0.0.0"
 
-const serviceName = "rms-template"
+const serviceName = "rms-speech"
 
 func main() {
 	logger.Infof("%s %s", serviceName, Version)
@@ -47,23 +49,23 @@ func main() {
 		}),
 	)
 
-	if useDebug {
+	cfg := config.Config()
+	if useDebug || cfg.Debug.Verbose {
 		_ = logger.Init(logger.WithLevel(logger.DebugLevel))
 	}
 
-	_ = servicemgr.NewServiceFactory(service)
-
-	_, err := db.Connect(config.Config().Database)
-	if err != nil {
-		logger.Fatalf("Connect to database failed: %s", err)
+	workers := worker.New(cfg.Workers, time.Duration(cfg.MaxJodDuration)*time.Minute)
+	speechService := &speech.Service{
+		Workers: workers,
 	}
 
 	// регистрируем хендлеры
-	//if err := rms_bot.RegisterRmsBotHandler(service.Server(), bot); err != nil {
-	//	logger.Fatalf("Register service failed: %s", err)
-	//}
+	if err := rms_speech.RegisterSpeechHandler(service.Server(), speechService); err != nil {
+		logger.Fatalf("Register service failed: %s", err)
+	}
 
 	if err := service.Run(); err != nil {
 		logger.Fatalf("Run service failed: %s", err)
 	}
+	workers.Stop()
 }
