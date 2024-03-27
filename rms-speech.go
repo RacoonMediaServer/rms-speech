@@ -55,9 +55,7 @@ func main() {
 	}
 
 	workers := worker.New(cfg.Workers, time.Duration(cfg.MaxJodDuration)*time.Minute)
-	speechService := &speech.Service{
-		Workers: workers,
-	}
+	speechService := speech.New(workers)
 
 	// регистрируем хендлеры
 	if err := rms_speech.RegisterSpeechHandler(service.Server(), speechService); err != nil {
