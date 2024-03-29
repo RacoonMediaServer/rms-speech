@@ -5,6 +5,7 @@ import (
 	"errors"
 	rms_speech "github.com/RacoonMediaServer/rms-packages/pkg/service/rms-speech"
 	"github.com/RacoonMediaServer/rms-packages/pkg/worker"
+	"github.com/RacoonMediaServer/rms-speech/internal/recognizer"
 	"github.com/google/uuid"
 	"go-micro.dev/v4/logger"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -14,7 +15,8 @@ import (
 )
 
 type Service struct {
-	workers Workers
+	workers    Workers
+	recognizer recognizer.Recognizer
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -25,11 +27,12 @@ type Service struct {
 	jobs map[string]*job
 }
 
-func New(workers Workers) *Service {
+func New(workers Workers, recognizer recognizer.Recognizer) *Service {
 	s := Service{
-		workers: workers,
-		jobs:    map[string]*job{},
-		l:       logger.DefaultLogger.Fields(map[string]interface{}{"from": "speech"}),
+		workers:    workers,
+		recognizer: recognizer,
+		jobs:       map[string]*job{},
+		l:          logger.DefaultLogger.Fields(map[string]interface{}{"from": "speech"}),
 	}
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 
@@ -58,8 +61,9 @@ func (s *Service) StartRecognition(ctx context.Context, request *rms_speech.Star
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	t := &task{
-		id:        id.String(),
-		inputFile: fileName,
+		id:         id.String(),
+		inputFile:  fileName,
+		recognizer: s.recognizer,
 	}
 	j := &job{
 		receipt: s.workers.Do(t),

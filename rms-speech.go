@@ -5,6 +5,7 @@ import (
 	rms_speech "github.com/RacoonMediaServer/rms-packages/pkg/service/rms-speech"
 	"github.com/RacoonMediaServer/rms-packages/pkg/worker"
 	"github.com/RacoonMediaServer/rms-speech/internal/config"
+	"github.com/RacoonMediaServer/rms-speech/internal/recognizer"
 	"github.com/RacoonMediaServer/rms-speech/internal/service/speech"
 	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
@@ -55,7 +56,7 @@ func main() {
 	}
 
 	workers := worker.New(cfg.Workers, time.Duration(cfg.MaxJodDuration)*time.Minute)
-	speechService := speech.New(workers)
+	speechService := speech.New(workers, recognizer.New(recognizer.WhisperExecutable, cfg.Whisper.Executable))
 
 	// регистрируем хендлеры
 	if err := rms_speech.RegisterSpeechHandler(service.Server(), speechService); err != nil {

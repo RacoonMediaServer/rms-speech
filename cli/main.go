@@ -7,6 +7,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"go-micro.dev/v4"
 	"os"
+	"time"
 )
 
 func main() {
@@ -53,5 +54,6 @@ func main() {
 		if status.Status == rms_speech.GetRecognitionStatusResponse_Failed {
 			break
 		}
+		<-time.After(1 * time.Second)
 	}
 }

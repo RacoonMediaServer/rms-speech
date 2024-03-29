@@ -1,4 +1,7 @@
 {
   "workers": 4,
-  "max_job_duration": 10
+  "max_jod_duration": 10,
+  "whisper": {
+    "executable": "/home/racoon/build-env/bin/whisper"
+  }
 }

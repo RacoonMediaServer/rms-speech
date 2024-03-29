@@ -7,6 +7,11 @@ type Configuration struct {
 	Workers        uint
 	MaxJodDuration uint `json:"max_jod_duration"`
 	Debug          configuration.Debug
+	Whisper        Whisper
+}
+
+type Whisper struct {
+	Executable string
 }
 
 var config Configuration
