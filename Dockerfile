@@ -16,5 +16,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN pip install --upgrade pip && pip install -U openai-whisper &&  mkdir /app
 WORKDIR /app
 COPY --from=builder /src/service/rms-speech .
+COPY --from=builder /src/service/speech-cli .
 COPY --from=builder /src/service/configs/rms-speech.json /etc/rms/
 CMD ["./rms-speech"]
