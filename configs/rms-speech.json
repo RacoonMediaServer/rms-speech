@@ -2,6 +2,6 @@
   "workers": 4,
   "max_jod_duration": 10,
   "whisper": {
-    "executable": "/home/racoon/build-env/bin/whisper"
+    "executable": "/usr/local/bin/whisper"
   }
 }
